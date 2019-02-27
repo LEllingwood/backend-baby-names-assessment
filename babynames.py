@@ -45,8 +45,39 @@ def extract_names(filename):
     followed by the name-rank strings in alphabetical order.
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
-    # +++your code here+++
-    return
+    result = []
+    with open(filename) as f:
+        text = f.read()
+
+    # Let's get the year, using the regex from README.md
+    year_match = re.search(r'Popularity\sin\s(\d\d\d\d)', text)
+
+    year = year_match.group(1)
+    print("Found year: {}".format(year))
+    result.append(year)
+
+    # Get the baby names and their ranks, as tuples
+    tuples = re.findall(r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', text)
+    # Each tuple looks like this now: ('984', 'Keven', 'Emilia')
+    # From data in the tuple, insert into result list.
+    names_to_rank = {}
+    for rank, boy, girl in tuples:
+        if boy not in names_to_rank:
+            names_to_rank[boy] = rank
+        if girl not in names_to_rank:
+            names_to_rank[girl] = rank
+
+    sorted_names = sorted(names_to_rank.keys())
+    for name in sorted_names:
+        result.append(name + ' ' + names_to_rank[name])
+    return result
+
+
+# def write_to_file(names):
+#     with open("baby*.html.summary", "w") as o:
+#         for line in lines:
+#             result = extract_names(filename)
+#             o.write(result)
 
 
 def create_parser():
@@ -65,17 +96,23 @@ def main():
     args = parser.parse_args()
 
     if not args:
+        # automatically generates an error message:
         parser.print_usage()
         sys.exit(1)
 
-    file_list = args.files
+    print args
 
-    # option flag
+# arguments:
+    file_list = args.files
     create_summary = args.summaryfile
 
-    # +++your code here+++
-    # For each filename, get the names, then either print the text output
-    # or write it to a summary file
+    for file in file_list:
+        names = extract_names(file)
+        if create_summary:
+            with open(file + '.summary', "w") as output: 
+                output.write("\n".join(names))
+        else:
+            print names
 
 
 if __name__ == '__main__':
